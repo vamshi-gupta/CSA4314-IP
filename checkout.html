@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('image4.png');  /* Path to your background image */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.6);  /* Semi-transparent background for header */
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            opacity: 0.9; /* Slight transparency to blend with background */
+        }
+        h2 {
+            color: #2a9d8f;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .address-section, .order-summary {
+            margin-bottom: 20px;
+        }
+        .address-list {
+            margin-bottom: 10px;
+        }
+        .address {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        .address.selected {
+            border-color: #2a9d8f;
+        }
+        .address button {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            float: right;
+        }
+        .address button:hover {
+            background-color: #c9302c;
+        }
+        .add-address {
+            margin-top: 10px;
+        }
+        .add-address button {
+            background-color: #2a9d8f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .add-address button:hover {
+            background-color: #21867a;
+        }
+        .order-summary table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .order-summary th, .order-summary td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .total-row {
+            font-weight: bold;
+        }
+        .actions {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .actions button {
+            padding: 10px 20px;
+            background-color: #2a9d8f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        .actions button:hover {
+            background-color: #21867a;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        Checkout
+    </header>
+    <div class="container">
+        <h2>Shipping Address</h2>
+        <div class="address-section">
+            <div id="addressList" class="address-list"></div>
+            <div class="add-address">
+                <button onclick="addNewAddress()">Add New Address</button>
+            </div>
+        </div>
+        <h2>Order Summary</h2>
+        <div class="order-summary">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody id="orderItems"></tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="2">Total</td>
+                        <td id="totalCost">$0.00</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="actions">
+            <button onclick="goToCart()">Back to Cart</button>
+            <button onclick="proceedToPayment()">Proceed to Payment</button>
+        </div>
+    </div>
+
+    <script>
+        let addresses = JSON.parse(localStorage.getItem('addresses')) || [
+            { id: 1, fullName: "John Doe", address: "123 Green Street", city: "New York", state: "NY", pinCode: "10001", phone: "1234567890" }
+        ];
+        let selectedAddress = localStorage.getItem('selectedAddress') || addresses[0]?.id || null;
+
+        function renderAddresses() {
+            const addressList = document.getElementById('addressList');
+            addressList.innerHTML = '';
+            addresses.forEach(address => {
+                const addressElement = document.createElement('div');
+                addressElement.classList.add('address');
+                if (selectedAddress == address.id) {
+                    addressElement.classList.add('selected');
+                }
+                addressElement.innerHTML = `
+                    <p>${address.fullName}, ${address.address}, ${address.city}, ${address.state}, ${address.pinCode}, ${address.phone}</p>
+                    <button onclick="removeAddress(${address.id})">Remove</button>
+                `;
+                addressElement.onclick = () => selectAddress(address.id);
+                addressList.appendChild(addressElement);
+            });
+        }
+
+        function addNewAddress() {
+            const newAddress = {
+                id: Date.now(),
+                fullName: prompt("Enter Full Name:"),
+                address: prompt("Enter Address:"),
+                city: prompt("Enter City:"),
+                state: prompt("Enter State:"),
+                pinCode: prompt("Enter Pin Code:"),
+                phone: prompt("Enter Phone Number:")
+            };
+            addresses.push(newAddress);
+            localStorage.setItem('addresses', JSON.stringify(addresses));
+            renderAddresses();
+        }
+
+        function removeAddress(id) {
+            addresses = addresses.filter(address => address.id !== id);
+            localStorage.setItem('addresses', JSON.stringify(addresses));
+            if (selectedAddress == id) selectedAddress = addresses[0]?.id || null;
+            localStorage.setItem('selectedAddress', selectedAddress);
+            renderAddresses();
+        }
+
+        function selectAddress(id) {
+            selectedAddress = id;
+            localStorage.setItem('selectedAddress', id);
+            renderAddresses();
+        }
+
+        const orderItems = JSON.parse(localStorage.getItem('cart')) || [];
+        function renderOrderItems() {
+            const orderItemsContainer = document.getElementById('orderItems');
+            let totalCost = 0;
+            orderItemsContainer.innerHTML = '';
+            orderItems.forEach(item => {
+                orderItemsContainer.innerHTML += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.quantity}</td>
+                        <td>$${(item.price * item.quantity).toFixed(2)}</td>
+                    </tr>
+                `;
+                totalCost += item.price * item.quantity;
+            });
+            document.getElementById('totalCost').textContent = `$${totalCost.toFixed(2)}`;
+        }
+
+        function proceedToPayment() {
+            if (!selectedAddress) {
+                alert("Please select a shipping address!");
+                return;
+            }
+            localStorage.setItem('selectedAddress', selectedAddress);
+            window.location.href = "payment.html";
+        }
+
+        function goToCart() {
+            window.location.href = "cart.html";
+        }
+
+        renderAddresses();
+        renderOrderItems();
+    </script>
+</body>
+</html>

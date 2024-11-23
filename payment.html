@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('image6.png'); /* Path to your background image */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.6);  /* Semi-transparent background for header */
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            opacity: 0.9; /* Slight transparency to blend with background */
+        }
+        .section-title {
+            color: #2a9d8f;
+            margin-bottom: 1rem;
+        }
+        .payment-methods {
+            background-color: #f9f9f9;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .payment-methods input {
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        .payment-methods select, .payment-methods button {
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .payment-methods select {
+            margin-bottom: 10px;
+        }
+        .actions {
+            text-align: center;
+        }
+        .actions button {
+            padding: 10px 20px;
+            background-color: #2a9d8f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .actions button:hover {
+            background-color: #21867a;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        Payment
+    </header>
+    <div class="container">
+        <!-- Payment Method Section -->
+        <div class="payment-methods">
+            <h3 class="section-title">Payment Methods</h3>
+            <input type="text" id="paymentSearch" placeholder="Search payment methods..." onkeyup="filterPaymentMethods()">
+            <select id="paymentMethodSelect">
+                <option value="ingenico">Ingenico (UPI, Net Banking, All Cards)</option>
+                <option value="global">Global Payment Methods</option>
+                <option value="airtel">Airtel Payment Methods (Cash)</option>
+                <option value="direct">Direct Deposit</option>
+            </select>
+            <button onclick="processPayment()">Proceed to Payment</button>
+        </div>
+
+        <div class="actions">
+            <button onclick="goBackToCheckout()">Back to Checkout</button>
+        </div>
+    </div>
+
+    <script>
+        // Payment method filtering function
+        function filterPaymentMethods() {
+            const searchQuery = document.getElementById('paymentSearch').value.toLowerCase();
+            const paymentOptions = document.querySelectorAll('#paymentMethodSelect option');
+            paymentOptions.forEach(option => {
+                if (option.textContent.toLowerCase().includes(searchQuery)) {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        }
+
+        // Process the payment
+        function processPayment() {
+            const paymentMethod = document.getElementById('paymentMethodSelect').value;
+
+            if (paymentMethod) {
+                alert("Payment successful with method: " + paymentMethod);
+
+                // Simulate sending SMS and email notifications
+                sendSMSNotification();
+                sendEmailNotification();
+
+                // Redirect to order confirmation page
+                window.location.href = "order_confirmation.html";
+            } else {
+                alert("Please select a payment method.");
+            }
+        }
+
+        // Send SMS notification
+        function sendSMSNotification() {
+            alert("SMS Notification: Your payment has been successfully completed.");
+            // Logic for sending SMS can be implemented here (e.g., using an API like Twilio)
+        }
+
+        // Send email notification
+        function sendEmailNotification() {
+            alert("Email Notification: Your payment has been successfully completed.");
+            // Logic for sending email can be implemented here (e.g., using an API like SendGrid)
+        }
+
+        // Go back to checkout page
+        function goBackToCheckout() {
+            window.location.href = "checkout.html";
+        }
+    </script>
+</body>
+</html>
